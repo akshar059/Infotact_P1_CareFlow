@@ -1,0 +1,8 @@
+transition,observations,average_elapsed_minutes,maximum_elapsed_minutes
+X-Ray -> Doctor Examination,1,35.0,35.0
+Treatment -> Discharge,2,32.5,35.0
+Doctor Examination -> Discharge,1,30.0,30.0
+Triage -> Doctor Examination,3,28.333333333333332,40.0
+Doctor Examination -> Treatment,2,25.0,30.0
+Doctor Examination -> X-Ray,1,15.0,15.0
+Registration -> Triage,3,13.333333333333334,15.0

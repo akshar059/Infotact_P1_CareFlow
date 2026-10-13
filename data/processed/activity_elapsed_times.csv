@@ -1,0 +1,14 @@
+case_id,activity,timestamp,next_activity,next_timestamp,elapsed_minutes,transition
+P001,Registration,2026-01-10 09:00:00,Triage,2026-01-10 09:15:00,15.0,Registration -> Triage
+P001,Triage,2026-01-10 09:15:00,Doctor Examination,2026-01-10 09:40:00,25.0,Triage -> Doctor Examination
+P001,Doctor Examination,2026-01-10 09:40:00,Treatment,2026-01-10 10:10:00,30.0,Doctor Examination -> Treatment
+P001,Treatment,2026-01-10 10:10:00,Discharge,2026-01-10 10:45:00,35.0,Treatment -> Discharge
+P002,Registration,2026-01-10 09:05:00,Triage,2026-01-10 09:20:00,15.0,Registration -> Triage
+P002,Triage,2026-01-10 09:20:00,Doctor Examination,2026-01-10 10:00:00,40.0,Triage -> Doctor Examination
+P002,Doctor Examination,2026-01-10 10:00:00,X-Ray,2026-01-10 10:15:00,15.0,Doctor Examination -> X-Ray
+P002,X-Ray,2026-01-10 10:15:00,Doctor Examination,2026-01-10 10:50:00,35.0,X-Ray -> Doctor Examination
+P002,Doctor Examination,2026-01-10 10:50:00,Treatment,2026-01-10 11:10:00,20.0,Doctor Examination -> Treatment
+P002,Treatment,2026-01-10 11:10:00,Discharge,2026-01-10 11:40:00,30.0,Treatment -> Discharge
+P003,Registration,2026-01-10 10:00:00,Triage,2026-01-10 10:10:00,10.0,Registration -> Triage
+P003,Triage,2026-01-10 10:10:00,Doctor Examination,2026-01-10 10:30:00,20.0,Triage -> Doctor Examination
+P003,Doctor Examination,2026-01-10 10:30:00,Discharge,2026-01-10 11:00:00,30.0,Doctor Examination -> Discharge
