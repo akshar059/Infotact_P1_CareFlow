@@ -1,0 +1,122 @@
+{
+  "split_cutoff": "2026-02-18 11:00:00",
+  "fit_on": "train rows only",
+  "case_level": {
+    "age": {
+      "mean": 54.72875,
+      "std": 21.42848976100509,
+      "min": 18.0,
+      "max": 90.0
+    },
+    "acuity": {
+      "mean": 3.2975,
+      "std": 0.9146003225453181,
+      "min": 1.0,
+      "max": 5.0
+    },
+    "n_events": {
+      "mean": 6.965,
+      "std": 2.2773394564710814,
+      "min": 4.0,
+      "max": 11.0
+    },
+    "n_unique_activities": {
+      "mean": 6.72875,
+      "std": 2.0112616531669865,
+      "min": 4.0,
+      "max": 10.0
+    },
+    "registration_to_triage_min": {
+      "mean": 12.59625,
+      "std": 6.75616281164834,
+      "min": 1.0,
+      "max": 25.0
+    },
+    "door_to_doctor_min": {
+      "mean": 43.005,
+      "std": 18.937066166647885,
+      "min": 4.0,
+      "max": 84.0
+    },
+    "xray_to_result_min": {
+      "mean": 12.9625,
+      "std": 12.386629636426528,
+      "min": 0.0,
+      "max": 35.0
+    },
+    "lab_turnaround_min": {
+      "mean": 12.05375,
+      "std": 16.96565238761834,
+      "min": 0.0,
+      "max": 50.0
+    },
+    "assessment_to_discharge_min": {
+      "mean": 63.99375,
+      "std": 39.40908792318721,
+      "min": 5.0,
+      "max": 176.0
+    },
+    "loopback_delay_min": {
+      "mean": 8.3475,
+      "std": 15.635272423274241,
+      "min": 0.0,
+      "max": 57.0
+    },
+    "start_hour": {
+      "mean": 11.55,
+      "std": 6.91755014437915,
+      "min": 0.0,
+      "max": 23.0
+    },
+    "total_duration_min": {
+      "mean": 106.99875,
+      "std": 44.0411029430179,
+      "min": 15.0,
+      "max": 234.0
+    }
+  },
+  "event_level": {
+    "minutes_since_prev": {
+      "mean": 15.362347451543432,
+      "std": 12.703514985307553,
+      "min": 0.0,
+      "max": 60.0
+    },
+    "minutes_since_case_start": {
+      "mean": 61.10211773151472,
+      "std": 48.59429760838389,
+      "min": 0.0,
+      "max": 234.0
+    },
+    "age": {
+      "mean": 54.37562814070352,
+      "std": 21.485160784546515,
+      "min": 18.0,
+      "max": 90.0
+    },
+    "acuity": {
+      "mean": 3.30437903804738,
+      "std": 0.9221075488051641,
+      "min": 1.0,
+      "max": 5.0
+    }
+  },
+  "model_ready": {
+    "age": {
+      "mean": 54.72875,
+      "std": 21.42848976100509,
+      "min": 18.0,
+      "max": 90.0
+    },
+    "acuity": {
+      "mean": 3.2975,
+      "std": 0.9146003225453181,
+      "min": 1.0,
+      "max": 5.0
+    },
+    "target_total_duration_min": {
+      "mean": 106.99875,
+      "std": 44.0411029430179
+    }
+  }
+}
