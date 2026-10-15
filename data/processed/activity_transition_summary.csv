@@ -1,0 +1,17 @@
+transition,transition_count
+Registration -> Triage,1000
+Triage -> Doctor Assessment,1000
+Doctor Assessment -> X-Ray,584
+X-Ray -> Radiology Result,584
+Lab Collection -> Lab Result,371
+Lab Result -> Discharge,371
+Radiology Result -> Documentation Review,349
+Doctor Assessment -> Discharge,267
+Radiology Result -> Triage,235
+Documentation Review -> Doctor Reassessment,235
+Triage -> Documentation Review,235
+Documentation Review -> Discharge,216
+Doctor Assessment -> Lab Collection,149
+Doctor Reassessment -> Discharge,146
+Documentation Review -> Lab Collection,133
+Doctor Reassessment -> Lab Collection,89
