@@ -1,0 +1,17 @@
+result,check,detail
+PASS,split is chronological (max train start <= min test start),train=800 test=200 cutoff=2026-02-18 11:00:00
+PASS,xray_to_result_min is NaN exactly when has_xray == 0,
+PASS,lab_turnaround_min is NaN exactly when has_lab == 0,
+PASS,loopback_delay_min is NaN exactly when has_reassessment == 0,
+PASS,genuine missing values in observed columns,found=0
+PASS,no missing values remain after imputation,
+PASS,imputation benchmark completed,"best by mean NRMSE: iterative_bayesridge; iterative_bayesridge=0.614, knn_k5=0.728, mean=1.010, median=1.017"
+PASS,standardized train: mean ~ 0,max|mean|=1.27e-16
+PASS,standardized train: std ~ 1,
+PASS,"normalized train within [0,1] and hits both ends",
+PASS,"normalized test values outside [0,1] (expected possible, NOT clipped)",count=2
+PASS,inverse transform recovers original values,
+PASS,event-level scaled rows == events rows,6964
+PASS,every event case has a split,
+PASS,model-ready features have no NaN,
+PASS,one-hot/sin/cos columns untouched (already bounded),
