@@ -1,0 +1,7 @@
+pathway,case_count,percentage
+Registration -> Triage -> Doctor Assessment -> Discharge,267,26.7
+Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Documentation Review -> Discharge,216,21.6
+Registration -> Triage -> Doctor Assessment -> Lab Collection -> Lab Result -> Discharge,149,14.9
+Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Triage -> Documentation Review -> Doctor Reassessment -> Discharge,146,14.6
+Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Documentation Review -> Lab Collection -> Lab Result -> Discharge,133,13.3
+Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Triage -> Documentation Review -> Doctor Reassessment -> Lab Collection -> Lab Result -> Discharge,89,8.9
