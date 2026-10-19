@@ -1,0 +1,11 @@
+activity_name,event_count,unique_cases,percentage_of_events,percentage_of_cases,repeat_event_count
+Triage,1235,1000,17.73,100.0,235
+Discharge,1000,1000,14.36,100.0,0
+Doctor Assessment,1000,1000,14.36,100.0,0
+Registration,1000,1000,14.36,100.0,0
+Documentation Review,584,584,8.39,58.4,0
+Radiology Result,584,584,8.39,58.4,0
+X-Ray,584,584,8.39,58.4,0
+Lab Collection,371,371,5.33,37.1,0
+Lab Result,371,371,5.33,37.1,0
+Doctor Reassessment,235,235,3.37,23.5,0
