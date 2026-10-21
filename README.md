@@ -28,7 +28,7 @@
 - [Repository Structure](#-repository-structure)
 - [Getting Started & Replication](#-getting-started--replication)
 - [Technology Stack](#-technology-stack)
-- [Author & Acknowledgments](#-author--acknowledgments)
+- [Team & Collaborators](#-team--collaborators)
 
 ---
 
@@ -323,10 +323,16 @@ jupyter notebook notebooks/
 
 ---
 
-## 👤 Author & Acknowledgments
+## 👥 Team & Collaborators
 
-- **Author / Lead Analyst:** **Akshar Patel**
-  - **GitHub:** [@akshar059](https://github.com/akshar059)
-  - **Email:** [akshar059@gmail.com](mailto:akshar059@gmail.com)
+- **Akshar Patel** — Lead Analyst
+  - GitHub: [@akshar059](https://github.com/akshar059)
+  - Email: [akshar059@gmail.com](mailto:akshar059@gmail.com)
+- **Sagar Janathe** — Collaborator
+  - GitHub: [@sagarjanathe-dev](https://github.com/sagarjanathe-dev)
+  - Email: [sagarj1221998@gmail.com](mailto:sagarj1221998@gmail.com)
+- **Prachi Bhilare** — Collaborator
+  - Email: [prachibhilare599@gmail.com](mailto:prachibhilare599@gmail.com)
+- **Prashanth** — Collaborator
 
 *Special thanks to the clinical analytics team and mentors for domain guidance across process mining methodologies.*
