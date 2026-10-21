@@ -332,7 +332,10 @@ jupyter notebook notebooks/
   - GitHub: [@sagarjanathe-dev](https://github.com/sagarjanathe-dev)
   - Email: [sagarj1221998@gmail.com](mailto:sagarj1221998@gmail.com)
 - **Prachi Bhilare** — Collaborator
+  - GitHub: [@PrachiBhilare](https://github.com/PrachiBhilare)
   - Email: [prachibhilare599@gmail.com](mailto:prachibhilare599@gmail.com)
 - **Prashanth** — Collaborator
+  - GitHub: [@prashanthrbhovi01-maker](https://github.com/prashanthrbhovi01-maker)
+  - Email: [prashanthrbhovi01@gmail.com](mailto:prashanthrbhovi01@gmail.com)
 
 *Special thanks to the clinical analytics team and mentors for domain guidance across process mining methodologies.*
