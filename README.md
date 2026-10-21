@@ -5,15 +5,13 @@
 [![Data Analytics](https://img.shields.io/badge/Domain-Healthcare%20Analytics-emerald.svg)](https://github.com/akshar059/Infotact_P1_CareFlow)
 [![Status](https://img.shields.io/badge/Project%20Status-Phase%202%20Audit%20Complete-brightgreen.svg)](#-sprint-progression--daily-milestones)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
-[![Internship](https://img.shields.io/badge/Infotact%20Solutions-Data%20Associate%20L1-blueviolet.svg)](#-project-metadata--assignment-details)
 
-> **CareFlow** is an end-to-end healthcare data analytics and clinical process-mining initiative developed under the **Infotact Solutions Data Analytics Internship Program**. The project leverages electronic health record (EHR) event logs to reconstruct patient journeys, discover clinical pathways, quantify transition latencies, detect operational loopbacks/rework, and engineer ML-ready feature pipelines for hospital resource optimization.
+> **CareFlow** is an end-to-end healthcare data analytics and clinical process-mining initiative. The project leverages electronic health record (EHR) event logs to reconstruct patient journeys, discover clinical pathways, quantify transition latencies, detect operational loopbacks/rework, and engineer ML-ready feature pipelines for hospital resource optimization.
 
 ---
 
 ## 📑 Table of Contents
 - [Executive Summary](#-executive-summary)
-- [Project Metadata & Assignment Details](#-project-metadata--assignment-details)
 - [System Architecture & Analytical Framework](#-system-architecture--analytical-framework)
 - [Dataset Specifications & Schema Audit](#-dataset-specifications--schema-audit)
 - [Machine Learning Preprocessing Pipeline](#-machine-learning-preprocessing-pipeline)
@@ -43,24 +41,6 @@ Hospitals and Emergency Departments (ED) face severe operational challenges, inc
 2. **Expose Operational Friction:** Quantify procedural waiting times across diagnostics (Lab collection, X-Ray) and medical consultations (Door-to-Doctor).
 3. **Map Clinical Loops & Rework:** Identify 705 loopback events occurring in 23.5% of cases (repeat triage, documentation re-checks, doctor reassessments).
 4. **Engineer Clean Predictive Data:** Deliver leakage-free, standardized, and imputed feature stores for downstream clinical length-of-stay forecasting.
-
----
-
-## 📋 Project Metadata & Assignment Details
-
-This project is conducted as part of the professional internship assignment at **Infotact Solutions**:
-
-| Detail | Specification |
-| :--- | :--- |
-| **Organization** | **Infotact Solutions** (Electronic City, Bengaluru, Karnataka, PIN 560100) |
-| **Reference Number** | `ITS/DA/1176` |
-| **Assignment Date** | 1 October 2026 |
-| **Intern Candidate** | **Akshar Patel** ([akshar059@gmail.com](mailto:akshar059@gmail.com)) |
-| **Role & Domain** | **Data Associate L1. Intern** — **Data Analytics** |
-| **Internship Duration** | 3 Months |
-| **Project Completion Window**| 1 Month (`05/10/2026` to `05/11/2026`) |
-| **Project Name** | **CareFlow: Clinical Pathway Process Mining** |
-| **Standards & Compliance**| ISO 9001:2015 & MSME Certified Documentation Standards |
 
 ---
 
@@ -345,12 +325,8 @@ jupyter notebook notebooks/
 
 ## 👤 Author & Acknowledgments
 
-- **Lead Analyst / Intern:** **Akshar Patel**
-  - **Role:** Data Associate L1. Intern
-  - **Email:** [akshar059@gmail.com](mailto:akshar059@gmail.com)
-  - **Phone:** +91 8320101316
+- **Author / Lead Analyst:** **Akshar Patel**
   - **GitHub:** [@akshar059](https://github.com/akshar059)
-- **Organization:** **Infotact Solutions** (Electronic City, Bengaluru, Karnataka, PIN 560100)
-- **Project Ref:** `ITS/DA/1176`
+  - **Email:** [akshar059@gmail.com](mailto:akshar059@gmail.com)
 
-*Special thanks to the analytics mentors at Infotact Solutions for guidance across clinical data standards and process mining methodologies.*
+*Special thanks to the clinical analytics team and mentors for domain guidance across process mining methodologies.*
