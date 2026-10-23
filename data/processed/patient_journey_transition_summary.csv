@@ -1,0 +1,17 @@
+rank,from_activity,to_activity,transition_count,percentage_of_transitions
+1,Registration,Triage,1000,16.77
+2,Triage,Doctor Assessment,1000,16.77
+3,Doctor Assessment,X-Ray,584,9.79
+4,X-Ray,Radiology Result,584,9.79
+5,Lab Collection,Lab Result,371,6.22
+6,Lab Result,Discharge,371,6.22
+7,Radiology Result,Documentation Review,349,5.85
+8,Doctor Assessment,Discharge,267,4.48
+9,Radiology Result,Triage,235,3.94
+10,Documentation Review,Doctor Reassessment,235,3.94
+11,Triage,Documentation Review,235,3.94
+12,Documentation Review,Discharge,216,3.62
+13,Doctor Assessment,Lab Collection,149,2.5
+14,Doctor Reassessment,Discharge,146,2.45
+15,Documentation Review,Lab Collection,133,2.23
+16,Doctor Reassessment,Lab Collection,89,1.49
