@@ -1,0 +1,17 @@
+rank,from_activity,to_activity,transition_count,average_elapsed_minutes,median_elapsed_minutes,maximum_elapsed_minutes
+1,Lab Collection,Lab Result,371,32.56,32.0,50.0
+2,Triage,Doctor Assessment,1000,30.74,29.0,60.0
+3,X-Ray,Radiology Result,584,22.42,22.0,35.0
+4,Documentation Review,Discharge,216,15.5,16.0,25.0
+5,Doctor Reassessment,Discharge,146,15.37,16.0,25.0
+6,Doctor Assessment,X-Ray,584,15.09,15.0,25.0
+7,Lab Result,Discharge,371,14.87,14.0,25.0
+8,Triage,Documentation Review,235,14.8,15.0,25.0
+9,Doctor Assessment,Discharge,267,14.79,15.0,25.0
+10,Registration,Triage,1000,12.62,12.0,25.0
+11,Doctor Assessment,Lab Collection,149,12.32,13.0,20.0
+12,Documentation Review,Lab Collection,133,12.28,12.0,20.0
+13,Doctor Reassessment,Lab Collection,89,12.15,13.0,20.0
+14,Documentation Review,Doctor Reassessment,235,11.64,12.0,20.0
+15,Radiology Result,Triage,235,8.67,8.0,15.0
+16,Radiology Result,Documentation Review,349,6.56,7.0,11.0
