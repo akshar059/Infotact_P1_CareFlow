@@ -329,10 +329,5 @@ shapes -> imputed (1000, 32) | standardized (1000, 33) | normalized (1000, 33) |
   - Email: [akshar059@gmail.com](mailto:akshar059@gmail.com)
   - Repository: [Infotact_P1_CareFlow](https://github.com/akshar059/Infotact_P1_CareFlow)
 
-### Project Collaborators
-- **Sagar Janathe** — Collaborator ([@sagarjanathe-dev](https://github.com/sagarjanathe-dev))
-- **Prachi Bhilare** — Collaborator ([@PrachiBhilare](https://github.com/PrachiBhilare))
-- **Prashanth** — Collaborator ([@prashanthrbhovi01-maker](https://github.com/prashanthrbhovi01-maker))
 
----
 *Developed as part of the Infotact Clinical Pathway Process Mining (CareFlow) initiative.*
