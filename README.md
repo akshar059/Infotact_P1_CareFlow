@@ -231,6 +231,9 @@ Day 01 ──► Day 02 ──► Day 03 ──► Day 04 ──► Day 05 ─�
 4. **Deploy Predictive LOS Scoring:**
    - *Finding:* Arrival-time features (acuity, age, arrival hour sin/cos) demonstrate strong predictive signals for total hospital duration.
    - *Recommendation:* Integrate `careflow_model_ready_scaled.csv` into automated bed-capacity forecasting models.
+5. **Mitigate Circadian Shift Turnover Delays:**
+   - *Finding:* Evening admissions (18:00–22:00) experience disproportionately higher door-to-doctor wait times due to shift handovers and arrival surges.
+   - *Recommendation:* Deploy continuous trigonometric cyclical hour modeling ($\sin/\cos$ arrival hour transforms) into predictive intake staffing schedules to anticipate peak boarding hours.
 
 ---
 
