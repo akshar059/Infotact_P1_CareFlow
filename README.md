@@ -25,6 +25,7 @@
   - [Event-Level Scaling](#event-level-scaling)
   - [Preservation of Scaler Parameters](#preservation-of-scaler-parameters)
 - [Model-Ready Arrival-Time Feature Store](#-model-ready-arrival-time-feature-store)
+  - [Mathematical Formulation of Feature Encodings & Targets](#-mathematical-formulation-of-feature-encodings--targets)
 - [Automated Validation & Verification Checks](#-automated-validation--verification-checks)
 - [Branch File Directory](#-branch-file-directory)
 - [How to Reproduce the Pipeline](#-how-to-reproduce-the-pipeline)
@@ -195,6 +196,35 @@ The file `careflow_model_ready_scaled.csv` is designed for **bed-capacity planni
 | **Downstream Targets** | `target_total_duration_min_z` | Standardized continuous duration target for regularized regressors |
 | **Downstream Targets** | `target_loopback` | Binary target: Whether the case encounters clinical rework (1) or not (0) |
 | **Downstream Targets** | `target_ends_next_day` | Binary target: Whether patient admission crosses midnight boarding threshold |
+
+### 📐 Mathematical Formulation of Feature Encodings & Targets
+
+#### 1. Trigonometric Cyclical Hour Encoding
+Emergency departments experience pronounced circadian volume fluctuations. Standard linear integer representations ($0, 1, \dots, 23$) introduce an artificial discontinuity between 23:00 and 00:00 (a mathematical jump of 23 units despite representing adjacent hours). We project the arrival hour onto a continuous two-dimensional unit circle:
+
+$$\text{start\_hour\_sin} = \sin\left(\frac{2\pi \cdot \text{start\_hour}}{24}\right), \quad \text{start\_hour\_cos} = \cos\left(\frac{2\pi \cdot \text{start\_hour}}{24}\right)$$
+
+This transformation ensures that Euclidean distance in feature space accurately reflects temporal proximity across midnight shift transitions, preserving model stability for distance-based and linear algorithms.
+
+#### 2. Clinical Acuity Stratification (ESI Standard)
+Patient acuity is scored based on the Emergency Severity Index (ESI), a five-level triage algorithm:
+- **ESI Level 1 (Resuscitation):** Immediate life-threatening presentation requiring zero wait time.
+- **ESI Level 2 (Emergent):** High-risk, altered mental state, or severe pain; door-to-doctor target $< 15$ min.
+- **ESI Level 3 (Urgent):** Stable vitals but requiring two or more diagnostic resources (e.g., both X-Ray and Laboratory workups).
+- **ESI Levels 4–5 (Less Urgent / Non-Urgent):** Single-resource or clinical-consult-only fast-track presentations.
+
+In `careflow_model_ready_scaled.csv`, acuity is provided in raw form (`acuity`), standardized form (`acuity_z`), and MinMax-normalized form (`acuity_mm`).
+
+#### 3. Formal Definitions of Target Variables
+To support multi-task hospital optimization, four distinct target formulations are engineered:
+1. **$\text{Target}_{\text{LOS}}$ (`target_total_duration_min` $\in \mathbb{R}^+$):**  
+   Continuous door-to-discharge hospital stay duration in elapsed minutes.
+2. **$\text{Target}_{\text{LOS, Z}}$ (`target_total_duration_min_z` $\sim \mathcal{N}(0, 1)$):**  
+   Normalized duration target standardized on training set parameters ($\mu = 106.999$, $\sigma = 44.041$), preventing gradient vanishing during neural network or regularized regression training.
+3. **$\text{Target}_{\text{Loopback}}$ (`target_loopback` $\in \{0, 1\}$):**  
+   Binary classification target identifying cases that experience clinical friction, repeated triage reassessments, or secondary doctor evaluations.
+4. **$\text{Target}_{\text{Boarding}}$ (`target_ends_next_day` $\in \{0, 1\}$):**  
+   Overnight stay indicator flagging admissions that cross the midnight census boundary ($23:59:59$), directly signaling bed allocation pressure and overnight staffing requirements.
 
 ---
 
