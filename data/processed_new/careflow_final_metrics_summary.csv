@@ -1,0 +1,5 @@
+Clinical Stage / Activity Pair,Avg Delay (mins),Bottleneck Priority
+Triage -> Lab Result,32.6,High
+Registration -> Doctor Assessment,30.7,High
+Radiology Order -> Radiology Result,22.4,Medium
+Doctor Assessment -> Discharge Decision,15.1,Low
