@@ -1,0 +1,17 @@
+recommendation_id,from_activity,to_activity,transition_count,average_elapsed_minutes,median_elapsed_minutes,investigation_priority,recommendation,suggested_metric
+1,Doctor Assessment,X-Ray,584,15.09,15.0,Further review,Review a sample of cases and validate timestamps before deciding whether workflow changes are needed.,"Monitor case count, median elapsed time, and 90th percentile."
+2,Lab Collection,Lab Result,371,32.56,32.0,High investigation priority,"Review laboratory sample transport, processing queues, and result recording timestamps.",Track median and 90th-percentile elapsed time for lab results.
+3,Triage,Doctor Assessment,1000,30.74,29.0,High investigation priority,Review patient queue patterns by hour and acuity before considering staffing or scheduling changes.,"Track elapsed time by hour and acuity, alongside median and 90th percentile."
+4,X-Ray,Radiology Result,584,22.42,22.0,High investigation priority,"Review imaging queue, reporting workflow, and timestamp consistency.",Track imaging-to-result elapsed time by department and time of day.
+5,Documentation Review,Discharge,216,15.5,16.0,High investigation priority,Review documentation completeness and discharge approval steps.,Track documentation completion time and discharge turnaround.
+6,Doctor Reassessment,Discharge,146,15.37,16.0,High investigation priority,Review reassessment documentation and subsequent discharge steps.,Track reassessment-to-discharge elapsed time and case counts.
+7,Radiology Result,Triage,235,8.67,8.0,High investigation priority,Review cases with this sequence to understand why triage occurs again.,Track repeat-triage cases and review their documented reasons.
+8,Lab Result,Discharge,371,14.87,14.0,Routine monitoring,Continue monitoring transition frequency and elapsed time.,Monitor transition count and median elapsed time.
+9,Triage,Documentation Review,235,14.8,15.0,Routine monitoring,Continue monitoring transition frequency and elapsed time.,Monitor transition count and median elapsed time.
+10,Doctor Assessment,Discharge,267,14.79,15.0,Routine monitoring,Continue monitoring transition frequency and elapsed time.,Monitor transition count and median elapsed time.
+11,Registration,Triage,1000,12.62,12.0,Routine monitoring,Continue monitoring transition frequency and elapsed time.,Monitor transition count and median elapsed time.
+12,Doctor Assessment,Lab Collection,149,12.32,13.0,Routine monitoring,Continue monitoring transition frequency and elapsed time.,Monitor transition count and median elapsed time.
+13,Documentation Review,Lab Collection,133,12.28,12.0,Routine monitoring,Continue monitoring transition frequency and elapsed time.,Monitor transition count and median elapsed time.
+14,Doctor Reassessment,Lab Collection,89,12.15,13.0,Routine monitoring,Continue monitoring transition frequency and elapsed time.,Monitor transition count and median elapsed time.
+15,Documentation Review,Doctor Reassessment,235,11.64,12.0,Routine monitoring,Continue monitoring transition frequency and elapsed time.,Monitor transition count and median elapsed time.
+16,Radiology Result,Documentation Review,349,6.56,7.0,Routine monitoring,Continue monitoring transition frequency and elapsed time.,Monitor transition count and median elapsed time.
