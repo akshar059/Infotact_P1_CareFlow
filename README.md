@@ -5,7 +5,7 @@
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3%2B-orange.svg?logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
 [![Pandas](https://img.shields.io/badge/Pandas-2.0%2B-150458.svg?logo=pandas&logoColor=white)](https://pandas.pydata.org/)
 [![Process Mining](https://img.shields.io/badge/Process%20Mining-PM4Py-brightgreen.svg)](https://pm4py.fit.fraunhofer.de/)
-[![Data Pipeline Checks](https://img.shields.io/badge/Pipeline%20Checks-15%2F15%20PASS-brightgreen.svg)](#-automated-validation--verification-checks)
+[![Data Pipeline Checks](https://img.shields.io/badge/Pipeline%20Checks-16%2F16%20PASS-brightgreen.svg)](#-automated-validation--verification-checks)
 [![Branch](https://img.shields.io/badge/Branch-akshar-purple.svg?logo=git)](https://github.com/akshar059/Infotact_P1_CareFlow/tree/akshar)
 
 > This branch (`akshar`) houses the **core machine learning preprocessing, leakage-free imputation, dual-scaling pipeline (MinMax & Z-Score), and arrival-time feature store engineering** for the **CareFlow Clinical Pathway Process Mining** project.
@@ -21,12 +21,13 @@
   - [Structural vs. Genuine Missingness](#structural-vs-genuine-missingness)
   - [10% Masking Benchmark Results](#10-masking-benchmark-results)
 - [Dual-Scaling Framework](#-dual-scaling-framework)
-  - [Case-Level Scaling](#case-level-scaling)
-  - [Event-Level Scaling](#event-level-scaling)
-  - [Preservation of Scaler Parameters](#preservation-of-scaler-parameters)
+  - [Case-Level Scaling](#1-z-score-standardization-careflow_cases_standardizedcsv)
+  - [Event-Level Scaling](#3-event-level-scaling-careflow_events_scaledcsv)
+  - [Preservation of Scaler Parameters](#4-preservation--production-deployment-of-scaler-parameters-scaler_parametersjson)
 - [Model-Ready Arrival-Time Feature Store](#-model-ready-arrival-time-feature-store)
   - [Mathematical Formulation of Feature Encodings & Targets](#-mathematical-formulation-of-feature-encodings--targets)
 - [Automated Validation & Verification Checks](#-automated-validation--verification-checks)
+- [Downstream Modeling Guidelines & Clinical Insights](#-downstream-modeling-guidelines--clinical-insights)
 - [Branch File Directory](#-branch-file-directory)
 - [How to Reproduce the Pipeline](#-how-to-reproduce-the-pipeline)
 - [Team & Contact](#-team--contact)
@@ -174,7 +175,34 @@ Scaling is also performed on the full event log (6,964 events) for event-step me
 - `minutes_since_prev` (mean: 15.36 min, std: 12.70 min, range: [0, 60])
 - `minutes_since_case_start` (mean: 61.10 min, std: 48.59 min, range: [0, 234])
 - Event-level `age` and `acuity`
+
+### 4. Preservation & Production Deployment of Scaler Parameters (`scaler_parameters.json`)
+
+To prevent temporal leakage in production inference pipelines, all empirical parameters ($\mu, \sigma, X_{\min}, X_{\max}$) calculated strictly on the training set (cases $\le 2026-02-18\ 11:00:00$) are permanently preserved in [`scaler_parameters.json`](file:///scaler_parameters.json).
+
+#### Parameter Structure:
+```json
+{
+  "split_cutoff": "2026-02-18 11:00:00",
+  "fit_on": "train rows only",
+  "case_level": {
+    "age": { "mean": 54.729, "std": 21.428, "min": 18.0, "max": 90.0 },
+    "acuity": { "mean": 3.298, "std": 0.915, "min": 1.0, "max": 5.0 },
+    "door_to_doctor_min": { "mean": 43.005, "std": 18.937, "min": 4.0, "max": 84.0 },
+    "total_duration_min": { "mean": 106.999, "std": 44.041, "min": 15.0, "max": 234.0 }
+  },
+  "event_level": { ... },
+  "model_ready": { ... }
+}
 ```
+
+#### Real-Time Inference Protocol:
+When an incoming admission arrives at the emergency department triage desk:
+1. **Intake Ingestion:** Patient demographic attributes (`age`), initial triage tier (`acuity`), and arrival timestamp (`case_start`) are captured.
+2. **Deterministic Encodings:** Trigonometric wave functions project arrival hour onto cyclical 24-hour coordinates ($\sin, \cos$); categorical variables are one-hot mapped.
+3. **Stateless Transformation:** Continuous variables are transformed using the persisted scaler constants:
+   $$z_{\text{new}} = \frac{x_{\text{new}} - \mu_{\text{train}}}{\sigma_{\text{train}}}, \quad x_{\text{norm, new}} = \frac{x_{\text{new}} - \min_{\text{train}}}{\max_{\text{train}} - \min_{\text{train}}}$$
+This guarantees that live operational inference exactly mimics the training distribution without requiring database lookbacks or risking data snooping.
 
 ---
 
@@ -230,7 +258,7 @@ To support multi-task hospital optimization, four distinct target formulations a
 
 ## ✅ Automated Validation & Verification Checks
 
-Every execution of `careflow_impute_scale.py` runs a 15-point automated verification suite. The test results are logged to `scaling_checks.csv`:
+Every execution of `careflow_impute_scale.py` runs a 16-point automated verification suite. The test results are logged to `scaling_checks.csv`:
 
 | Test # | Check Description | Result | Details / Metrics |
 | :---: | :--- | :---: | :--- |
@@ -249,8 +277,31 @@ Every execution of `careflow_impute_scale.py` runs a 15-point automated verifica
 | **13** | Event-level scaled dataset row count matches input event log | **PASS** | Exactly `6,964` rows preserved |
 | **14** | Every event case mapping is assigned a valid train/test split | **PASS** | 100% case-event linkage integrity |
 | **15** | Model-ready arrival feature store contains zero null values | **PASS** | 41 feature columns fully bounded and ready |
+| **16** | One-hot, sine, and cosine columns untouched (already bounded) | **PASS** | Categorical dummies & cyclical coordinates natively bounded in $[-1, 1]$ or $\{0, 1\}$ |
 
-**Final Quality Gate:** **15 PASS / 0 FAIL (100% Passing Rate)**.
+**Final Quality Gate:** **16 PASS / 0 FAIL (100% Passing Rate)**.
+
+---
+
+## 💡 Downstream Modeling Guidelines & Clinical Insights
+
+To maximize predictive accuracy and clinical utility when training models on `careflow_model_ready_scaled.csv`, the following practices are recommended:
+
+### 1. Length of Stay (LOS) Regression (`target_total_duration_min`)
+- **Distribution Characteristics:** ED length of stay exhibits a right-skewed log-normal distribution with operational outliers (tail up to 234 minutes).
+- **Recommended Loss Formulation:**
+  - Standard Mean Squared Error (MSE) is hypersensitive to extreme long-stay outliers. Use **Huber Loss** ($\delta = 1.0$) or **Log-Cosh Loss** for neural network and gradient-based regressors.
+  - Tree-based gradient boosters (**LightGBM**, **XGBoost**, **CatBoost**) perform optimally with `objective="regression_l1"` (MAE) to predict robust median wait times.
+- **Normalized Target Usage:** For regularized linear models (Ridge/Lasso) and multi-layer perceptrons (MLP), train against `target_total_duration_min_z` to prevent gradient explosion and maintain numerical stability.
+
+### 2. Clinical Rework Classification (`target_loopback`)
+- **Class Imbalance:** Clinical loopbacks (unplanned triage re-evaluations or secondary doctor consults) represent approximately 12–15% of acute admissions.
+- **Evaluation Metrics:** Standard classification accuracy is misleading due to class imbalance; evaluate models using **PR-AUC (Precision-Recall AUC)**, **Balanced Accuracy**, and **Brier Score**.
+- **Class Balancing:** Incorporate focal loss ($\gamma = 2.0$) or cost-sensitive class weighting ($w_1 = \frac{N_{\text{total}}}{2 \cdot N_{\text{pos}}}$) to prioritize clinical sensitivity for patients requiring repeat assessment.
+
+### 3. Bed Boarding & Midnight Census Boundary (`target_ends_next_day`)
+- **Operational Value:** Anticipates overnight boarding bottlenecks, alerting inpatient charge nurses to reserve bed capacity before midnight shift handover.
+- **Predictive Drivers:** Strong non-linear interaction between late evening arrival waves ($\text{start\_hour} \ge 19$) and high acuity ($\text{acuity} \le 2$).
 
 ---
 
@@ -267,7 +318,7 @@ Every execution of `careflow_impute_scale.py` runs a 15-point automated verifica
 ├── careflow_model_ready_scaled.csv    # Leakage-free arrival-time ML feature store (1,000 x 41)
 ├── imputation_benchmark.csv           # 10% masking empirical error matrix (NRMSE)
 ├── scaler_parameters.json             # Fit scaler constants (mean, std, min, max) for inference
-└── scaling_checks.csv                 # 15-point automated verification execution log
+└── scaling_checks.csv                 # 16-point automated verification execution log
 ```
 
 ---
@@ -322,7 +373,7 @@ python careflow_impute_scale.py
    PASS                                           model-ready features have no NaN                                                        
    PASS                               one-hot/sin/cos columns untouched (already bounded)                                              
 
-PASS: 15 FAIL: 0
+PASS: 16 FAIL: 0
 shapes -> imputed (1000, 32) | standardized (1000, 33) | normalized (1000, 33) | events (6964, 27) | model-ready (1000, 41)
 ```
 
