@@ -28,6 +28,8 @@
   - [Mathematical Formulation of Feature Encodings & Targets](#-mathematical-formulation-of-feature-encodings--targets)
 - [Automated Validation & Verification Checks](#-automated-validation--verification-checks)
 - [Downstream Modeling Guidelines & Clinical Insights](#-downstream-modeling-guidelines--clinical-insights)
+- [Data Dictionary & Output Feature Catalog](#-data-dictionary--output-feature-catalog)
+- [Clinical Process Mining Alignment & Variant Flow](#-clinical-process-mining-alignment--variant-flow)
 - [Branch File Directory](#-branch-file-directory)
 - [How to Reproduce the Pipeline](#-how-to-reproduce-the-pipeline)
 - [Team & Contact](#-team--contact)
@@ -295,13 +297,64 @@ To maximize predictive accuracy and clinical utility when training models on `ca
 - **Normalized Target Usage:** For regularized linear models (Ridge/Lasso) and multi-layer perceptrons (MLP), train against `target_total_duration_min_z` to prevent gradient explosion and maintain numerical stability.
 
 ### 2. Clinical Rework Classification (`target_loopback`)
-- **Class Imbalance:** Clinical loopbacks (unplanned triage re-evaluations or secondary doctor consults) represent approximately 12–15% of acute admissions.
+- **Class Imbalance:** Clinical loopbacks (unplanned triage re-evaluations or secondary doctor consults) occur in **23.5%** of admissions (235 out of 1,000 cases; 23.6% in training, 23.0% in testing).
 - **Evaluation Metrics:** Standard classification accuracy is misleading due to class imbalance; evaluate models using **PR-AUC (Precision-Recall AUC)**, **Balanced Accuracy**, and **Brier Score**.
 - **Class Balancing:** Incorporate focal loss ($\gamma = 2.0$) or cost-sensitive class weighting ($w_1 = \frac{N_{\text{total}}}{2 \cdot N_{\text{pos}}}$) to prioritize clinical sensitivity for patients requiring repeat assessment.
 
 ### 3. Bed Boarding & Midnight Census Boundary (`target_ends_next_day`)
 - **Operational Value:** Anticipates overnight boarding bottlenecks, alerting inpatient charge nurses to reserve bed capacity before midnight shift handover.
 - **Predictive Drivers:** Strong non-linear interaction between late evening arrival waves ($\text{start\_hour} \ge 19$) and high acuity ($\text{acuity} \le 2$).
+
+---
+
+## 📋 Data Dictionary & Output Feature Catalog
+
+The preprocessing pipeline outputs modular, specialized artifacts tailored for both machine learning inference and process mining analytics:
+
+### 1. `careflow_model_ready_scaled.csv` (1,000 Cases × 41 Columns)
+Engineered exclusively with **arrival-time attributes** available at initial ED intake to completely preclude data leakage:
+
+| Field Group | Column Name(s) | Data Type | Description & Range |
+| :--- | :--- | :---: | :--- |
+| **Case Metadata** | `case_id`, `case_start`, `split` | `string` / `datetime` | Unique identifier, intake timestamp, chronological cohort (`train` / `test`) |
+| **Demographics** | `age`, `age_z`, `age_mm` | `int64` / `float64` | Patient age in years ($[18, 90]$), standardized ($z$), and normalized ($[0, 1]$) |
+| **Age Tiers** | `age_group_18-39`, `age_group_40-59`, `age_group_60+` | `int64` (binary) | One-hot encoded age category indicators |
+| **Clinical Severity** | `acuity`, `acuity_z`, `acuity_mm` | `int64` / `float64` | Emergency Severity Index score ($1 = \text{Resuscitation}, \dots, 5 = \text{Non-Urgent}$) |
+| **Circadian Waves** | `start_hour_sin`, `start_hour_cos` | `float64` | Trigonometric 24h harmonic coordinates continuous on $[-1.0, 1.0]$ |
+| **Calendar Signals** | `is_weekend`, `start_weekday_*` | `int64` (binary) | Weekend flag ($0/1$) and 7 one-hot weekday dummy indicators |
+| **Shift Operational** | `shift_Day`, `shift_Evening`, `shift_Night` | `int64` (binary) | Hospital operational shift blocks |
+| **Attending Staff** | `resource_DR01` through `resource_DR12` | `int64` (binary) | Primary attending physician assignment one-hot flags |
+| **Target: Duration** | `target_total_duration_min`, `_z` | `float64` | Continuous door-to-discharge length of stay (raw min and $z$-standardized) |
+| **Target: Rework** | `target_loopback` | `int64` (binary) | Binary classification label ($1 =$ patient encounters loopback reassessment) |
+| **Target: Boarding** | `target_ends_next_day` | `int64` (binary) | Binary classification label ($1 =$ patient crosses midnight census boundary) |
+
+### 2. `careflow_events_scaled.csv` (6,964 Events × 27 Columns)
+Enriched event-level transition log formatted for process mining and sequence modeling:
+
+| Column Name | Type | Description |
+| :--- | :---: | :--- |
+| `case_id` | `string` | Unique case identifier linking to patient case records |
+| `activity_name` | `string` | Activity label (`Registration`, `Triage`, `Doctor Assessment`, `X-Ray`, etc.) |
+| `activity_category` | `string` | High-level clinical functional domain (Admin, Clinical, Diagnostic) |
+| `timestamp` | `datetime` | Execution timestamp recorded at minute-level resolution |
+| `activity_order`, `activity_occurrence` | `int64` | Sequential step index within trace and repetition counter |
+| `is_repeat_activity`, `is_loopback_event` | `int64` (binary) | Binary flags indicating clinical recurrence or pathway loopback |
+| `minutes_since_prev`, `_z`, `_mm` | `float64` | Transition step duration from immediate predecessor event |
+| `minutes_since_case_start`, `_z`, `_mm` | `float64` | Cumulative elapsed duration from initial hospital registration |
+
+### 3. `careflow_cases_imputed.csv` (1,000 Cases × 32 Columns)
+Full clinical cohort with structural missingness handled via explicit binary flags (`has_xray`, `has_lab`, `has_reassessment`) preserving exact procedure occurrence truth while filling structural gaps with `0.0` minutes.
+
+---
+
+## 🔄 Clinical Process Mining Alignment & Variant Flow
+
+The preprocessed datasets generated on this branch directly interface with process mining frameworks such as **PM4Py**:
+
+- **Control-Flow Discovery:** The 6,964 standardized clinical events represent 1,000 complete patient pathways. Across all cases, 10 distinct activity classes characterize patient journeys from admission to discharge.
+- **Loopback Pathway Analysis:** The 235 re-triage occurrences (`is_loopback_event == 1`) capture critical clinical rework loops, where patients destabilize or require secondary assessment following initial doctor evaluation.
+- **Diagnostic Bottleneck Quantification:** Step durations (`minutes_since_prev`) allow empirical identification of diagnostic queue bottlenecks, particularly delays between doctor assessment and radiology/lab completion.
+- **Trace Alignment & Conformance:** The dual-scaled representations allow sequence models (LSTMs, GRUs, Transformers) to ingest multi-variate event logs alongside tokenized activity sequences for real-time next-activity and remaining-time prediction.
 
 ---
 
