@@ -1,0 +1,7 @@
+pathway_label,activity_sequence,patient_count
+Pathway 1,Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Triage -> Documentation Review -> Doctor Reassessment -> Lab Collection -> Lab Result -> Discharge,89
+Pathway 2,Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Documentation Review -> Lab Collection -> Lab Result -> Discharge,133
+Pathway 3,Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Triage -> Documentation Review -> Doctor Reassessment -> Discharge,146
+Pathway 4,Registration -> Triage -> Doctor Assessment -> Lab Collection -> Lab Result -> Discharge,149
+Pathway 5,Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Documentation Review -> Discharge,216
+Pathway 6,Registration -> Triage -> Doctor Assessment -> Discharge,267
