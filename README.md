@@ -30,6 +30,8 @@
 - [Downstream Modeling Guidelines & Clinical Insights](#-downstream-modeling-guidelines--clinical-insights)
 - [Data Dictionary & Output Feature Catalog](#-data-dictionary--output-feature-catalog)
 - [Clinical Process Mining Alignment & Variant Flow](#-clinical-process-mining-alignment--variant-flow)
+  - [The 6 Canonical Pathway Variants](#the-6-canonical-pathway-variants)
+  - [Empirical Rework Penalty Analysis](#empirical-rework-penalty-analysis)
 - [Branch File Directory](#-branch-file-directory)
 - [How to Reproduce the Pipeline](#-how-to-reproduce-the-pipeline)
 - [Team & Contact](#-team--contact)
@@ -349,12 +351,36 @@ Full clinical cohort with structural missingness handled via explicit binary fla
 
 ## 🔄 Clinical Process Mining Alignment & Variant Flow
 
-The preprocessed datasets generated on this branch directly interface with process mining frameworks such as **PM4Py**:
+The preprocessed datasets generated on this branch directly interface with process mining frameworks such as **PM4Py** to discover Petri nets, directly-follows graphs (DFG), and detect operational bottlenecks:
 
 - **Control-Flow Discovery:** The 6,964 standardized clinical events represent 1,000 complete patient pathways. Across all cases, 10 distinct activity classes characterize patient journeys from admission to discharge.
 - **Loopback Pathway Analysis:** The 235 re-triage occurrences (`is_loopback_event == 1`) capture critical clinical rework loops, where patients destabilize or require secondary assessment following initial doctor evaluation.
 - **Diagnostic Bottleneck Quantification:** Step durations (`minutes_since_prev`) allow empirical identification of diagnostic queue bottlenecks, particularly delays between doctor assessment and radiology/lab completion.
 - **Trace Alignment & Conformance:** The dual-scaled representations allow sequence models (LSTMs, GRUs, Transformers) to ingest multi-variate event logs alongside tokenized activity sequences for real-time next-activity and remaining-time prediction.
+
+### The 6 Canonical Pathway Variants
+
+Process mining trace clustering isolates exactly **6 distinct clinical trajectory variants** across the 1,000 cases:
+
+| Variant ID | Clinical Pathway Trace | Cases ($N$) | % Cohort | Train / Test | Mean Duration ($\pm$ Std) | Median | Min–Max | Clinical Track |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **`V1`** | `Registration` $\to$ `Triage` $\to$ `Doctor Assessment` $\to$ `Discharge` | 267 | 26.7% | 219 / 48 | $58.55 \pm 21.23$ min | 58.0 min | 12 – 107 min | Direct Fast Track (Low Acuity) |
+| **`V2`** | `Registration` $\to$ `Triage` $\to$ `Doctor Assessment` $\to$ `X-Ray` $\to$ `Radiology Result` $\to$ `Documentation Review` $\to$ `Discharge` | 216 | 21.6% | 166 / 50 | $102.34 \pm 22.11$ min | 102.0 min | 52 – 158 min | Linear Radiology Track |
+| **`V3`** | `Registration` $\to$ `Triage` $\to$ `Doctor Assessment` $\to$ `Lab Collection` $\to$ `Lab Result` $\to$ `Discharge` | 149 | 14.9% | 115 / 34 | $102.92 \pm 23.68$ min | 102.0 min | 44 – 157 min | Linear Laboratory Track |
+| **`V4`** | `Registration` $\to$ `Triage` $\to$ `Doctor Assessment` $\to$ `X-Ray` $\to$ `Radiology Result` $\to$ **`Triage`** $\to$ `Documentation Review` $\to$ **`Doctor Reassessment`** $\to$ `Discharge` | 146 | 14.6% | 117 / 29 | $132.82 \pm 24.19$ min | 134.0 min | 73 – 192 min | Radiology with Intermediate Rework Loop |
+| **`V5`** | `Registration` $\to$ `Triage` $\to$ `Doctor Assessment` $\to$ `X-Ray` $\to$ `Radiology Result` $\to$ `Documentation Review` $\to$ `Lab Collection` $\to$ `Lab Result` $\to$ `Discharge` | 133 | 13.3% | 111 / 22 | $146.56 \pm 26.17$ min | 147.0 min | 84 – 207 min | Linear Comprehensive Dual-Diagnostic |
+| **`V6`** | `Registration` $\to$ `Triage` $\to$ `Doctor Assessment` $\to$ `X-Ray` $\to$ `Radiology Result` $\to$ **`Triage`** $\to$ `Documentation Review` $\to$ **`Doctor Reassessment`** $\to$ `Lab Collection` $\to$ `Lab Result` $\to$ `Discharge` | 89 | 8.9% | 72 / 17 | $174.57 \pm 26.75$ min | 175.0 min | 120 – 234 min | Complex Dual-Diagnostic with Rework Loop |
+
+### Empirical Rework Penalty Analysis
+
+Comparative duration analysis across matched diagnostic tracks quantifies the exact operational delay induced by clinical loopback events:
+
+1. **Radiological Pathway Penalty ($V4$ vs. $V2$):**
+   - Unplanned re-triage and secondary doctor evaluation adds an average of **$+30.48$ minutes** ($+29.8\%$ operational expansion; $132.82$ vs. $102.34$ min).
+2. **Dual-Diagnostic Pathway Penalty ($V6$ vs. $V5$):**
+   - The addition of an intermediate reassessment cycle adds **$+28.01$ minutes** ($+19.1\%$ delay penalty; $174.57$ vs. $146.56$ min), with maximum stay extending to $234.0$ minutes.
+3. **Loopback Cohort Isolation:**
+   - Variants $V4$ ($N=146$) and $V6$ ($N=89$) account for **100% of the 235 rework cases** (`target_loopback == 1`). Predicting these trajectories at patient admission allows triage nursing managers to allocate fast-track reassessment slots and avert severe ED boarding.
 
 ---
 
