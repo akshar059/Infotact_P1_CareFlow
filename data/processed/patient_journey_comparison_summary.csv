@@ -1,0 +1,7 @@
+activity_sequence,patient_count,average_journey_duration_minutes,minimum_journey_duration_minutes,maximum_journey_duration_minutes,percentage_of_patients
+Registration -> Triage -> Doctor Assessment -> Discharge,267,58.55,12.0,107.0,26.7
+Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Documentation Review -> Discharge,216,102.34,52.0,158.0,21.6
+Registration -> Triage -> Doctor Assessment -> Lab Collection -> Lab Result -> Discharge,149,102.92,44.0,157.0,14.9
+Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Triage -> Documentation Review -> Doctor Reassessment -> Discharge,146,132.82,73.0,192.0,14.6
+Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Documentation Review -> Lab Collection -> Lab Result -> Discharge,133,146.56,84.0,207.0,13.3
+Registration -> Triage -> Doctor Assessment -> X-Ray -> Radiology Result -> Triage -> Documentation Review -> Doctor Reassessment -> Lab Collection -> Lab Result -> Discharge,89,174.57,120.0,234.0,8.9
