@@ -32,6 +32,9 @@
 - [Clinical Process Mining Alignment & Variant Flow](#-clinical-process-mining-alignment--variant-flow)
   - [The 6 Canonical Pathway Variants](#the-6-canonical-pathway-variants)
   - [Empirical Rework Penalty Analysis](#empirical-rework-penalty-analysis)
+- [Operational & Clinical Demographics Benchmark](#-operational--clinical-demographics-benchmark)
+  - [Physician Workload & Variation Analysis](#physician-workload--variation-analysis-resource_dr01--dr12)
+  - [Shift Dynamics & Midnight Boarding Census](#shift-dynamics--midnight-boarding-census)
 - [Branch File Directory](#-branch-file-directory)
 - [How to Reproduce the Pipeline](#-how-to-reproduce-the-pipeline)
 - [Team & Contact](#-team--contact)
@@ -381,6 +384,46 @@ Comparative duration analysis across matched diagnostic tracks quantifies the ex
    - The addition of an intermediate reassessment cycle adds **$+28.01$ minutes** ($+19.1\%$ delay penalty; $174.57$ vs. $146.56$ min), with maximum stay extending to $234.0$ minutes.
 3. **Loopback Cohort Isolation:**
    - Variants $V4$ ($N=146$) and $V6$ ($N=89$) account for **100% of the 235 rework cases** (`target_loopback == 1`). Predicting these trajectories at patient admission allows triage nursing managers to allocate fast-track reassessment slots and avert severe ED boarding.
+
+---
+
+## 📈 Operational & Clinical Demographics Benchmark
+
+To provide complete clinical context for machine learning baselines and workflow optimization, this section summarizes empirical workload, clinician variation, and temporal patterns across the 1,000 patient cohort.
+
+### Physician Workload & Variation Analysis (`resource_DR01` – `DR12`)
+
+Attending emergency physicians exhibit distinct case throughput, length of stay (LOS), and loopback consultation patterns across the 1,000 admissions:
+
+| Attending Physician | Cases Handled ($N$) | Cohort Share | Mean LOS (min) | Loopback Rate (%) | Mean Acuity | Primary Operational Profile |
+| :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **`DR01`** | 102 | 10.2% | 101.03 | 23.5% | 3.23 | High volume, rapid throughput |
+| **`DR02`** | 86 | 8.6% | 109.60 | 25.6% | 3.35 | Moderate volume, standard diagnostic pace |
+| **`DR03`** | 79 | 7.9% | 105.16 | 25.3% | 3.23 | Balanced case allocation |
+| **`DR04`** | 82 | 8.2% | 114.12 | 18.3% | 3.32 | Extended duration, low re-triage rate |
+| **`DR05`** | 89 | 8.9% | 102.53 | 13.5% | 3.28 | Rapid disposition, low rework frequency |
+| **`DR06`** | 75 | 7.5% | 109.23 | 32.0% | 3.32 | Higher clinical consultation recurrence |
+| **`DR07`** | 106 | 10.6% | 104.72 | 20.8% | 3.37 | Highest overall volume, efficient discharge |
+| **`DR08`** | 74 | 7.4% | 108.95 | 25.7% | 3.31 | Standard operational baseline |
+| **`DR09`** | 85 | 8.5% | 108.12 | 23.5% | 3.25 | Balanced clinical throughput |
+| **`DR10`** | 64 | 6.4% | 108.94 | 29.7% | 3.34 | Lowest patient volume, thorough workups |
+| **`DR11`** | 73 | 7.3% | 103.58 | 12.3% | 3.26 | Lowest loopback rate (high first-pass disposition) |
+| **`DR12`** | 85 | 8.5% | 116.44 | 34.1% | 3.32 | Highest LOS & highest loopback rate |
+
+> **Modeling Implication:** The inclusion of one-hot doctor indicators (`resource_DR01`–`DR12`) in `careflow_model_ready_scaled.csv` serves as an essential **fixed-effects covariate**, capturing clinician-specific evaluation styles that explain substantial variance in total length of stay without temporal look-ahead leakage.
+
+### Shift Dynamics & Midnight Boarding Census
+
+Emergency volume and boarding pressure vary significantly across 8-hour operational shift blocks:
+
+| Operational Shift | Time Interval | Admissions ($N$) | Cohort Share | Mean LOS (min) | Loopback Rate (%) | Midnight Crossing (`target_ends_next_day`) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **`Day`** | 07:00 – 15:00 | 312 | 31.2% | 110.63 | 26.0% | **0.0%** (0 cases) |
+| **`Evening`** | 15:00 – 23:00 | 358 | 35.8% | 105.14 | 22.3% | **10.3%** (37 cases) |
+| **`Night`** | 23:00 – 07:00 | 330 | 33.0% | 107.09 | 23.9% | **13.3%** (44 cases) |
+
+- **Midnight Bottleneck Isolation:** 100% of the 81 overnight cases crossing the midnight census boundary occur during Evening (45.7%) and Night (54.3%) admissions. Zero day-shift patients cross midnight.
+- **Circadian Wave Synergy:** Combining `shift_*` dummies with continuous harmonics (`start_hour_sin`, `start_hour_cos`) enables neural network and boosting architectures to detect late-evening surge points before shift changeovers.
 
 ---
 
