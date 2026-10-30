@@ -35,6 +35,11 @@
 - [Operational & Clinical Demographics Benchmark](#-operational--clinical-demographics-benchmark)
   - [Physician Workload & Variation Analysis](#physician-workload--variation-analysis-resource_dr01--dr12)
   - [Shift Dynamics & Midnight Boarding Census](#shift-dynamics--midnight-boarding-census)
+- [Clinical Triage Stratification & Diagnostic Interval Benchmark](#-clinical-triage-stratification--diagnostic-interval-benchmark)
+  - [ESI Acuity Triage Velocity & Queue Dynamics](#esi-acuity-triage-velocity--queue-dynamics)
+  - [Diagnostic Turnaround Latency Decomposition](#diagnostic-turnaround-latency-decomposition-x-ray-vs-laboratory)
+  - [Activity Queue Transition Matrix](#activity-queue-transition-matrix-careflow_events_scaledcsv)
+  - [Target Correlation & Feature Sensitivity](#target-correlation--feature-sensitivity)
 - [Branch File Directory](#-branch-file-directory)
 - [How to Reproduce the Pipeline](#-how-to-reproduce-the-pipeline)
 - [Team & Contact](#-team--contact)
@@ -424,6 +429,75 @@ Emergency volume and boarding pressure vary significantly across 8-hour operatio
 
 - **Midnight Bottleneck Isolation:** 100% of the 81 overnight cases crossing the midnight census boundary occur during Evening (45.7%) and Night (54.3%) admissions. Zero day-shift patients cross midnight.
 - **Circadian Wave Synergy:** Combining `shift_*` dummies with continuous harmonics (`start_hour_sin`, `start_hour_cos`) enables neural network and boosting architectures to detect late-evening surge points before shift changeovers.
+
+---
+
+## 🔬 Clinical Triage Stratification & Diagnostic Interval Benchmark
+
+To support downstream queueing theory, simulation models, and predictive triage routing, this section provides an empirical breakdown of patient flow dynamics across Emergency Severity Index (ESI) levels, diagnostic service turnaround latencies, and activity transitions:
+
+### ESI Acuity Triage Velocity & Queue Dynamics
+
+Emergency triage assigns patients an acuity score from **ESI 1** (Resuscitation) to **ESI 5** (Non-Urgent). Analysis reveals a pronounced **bimodal triage operational regime**:
+
+| ESI Acuity | Triage Category | Patient Count ($N$) | Cohort Share | Reg $\to$ Triage Wait (min) | Door $\to$ Doctor Velocity (min) | Assessment $\to$ Discharge (min) | Mean Total LOS (min) | Loopback Rate (%) | Midnight Crossing (%) |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **`ESI 1`** | Resuscitation | 26 | 2.6% | $3.77 \pm 2.10$ | **$14.12 \pm 6.64$** | $77.31 \pm 45.55$ | $91.42 \pm 46.34$ | 23.1% | 3.8% |
+| **`ESI 2`** | Emergent | 144 | 14.4% | $4.22 \pm 2.42$ | **$16.01 \pm 5.95$** | $59.76 \pm 38.26$ | $75.76 \pm 38.93$ | 26.4% | 7.6% |
+| **`ESI 3`** | Urgent | 429 | 42.9% | $14.34 \pm 6.14$ | **$48.86 \pm 15.94$** | $63.22 \pm 38.87$ | $112.09 \pm 42.23$ | 21.7% | 9.1% |
+| **`ESI 4`** | Less Urgent | 309 | 30.9% | $14.27 \pm 5.98$ | **$48.97 \pm 15.44$** | $65.67 \pm 38.15$ | $114.64 \pm 41.66$ | 24.3% | 7.1% |
+| **`ESI 5`** | Non-Urgent | 92 | 9.2% | $14.72 \pm 6.05$ | **$49.96 \pm 15.57$** | $66.35 \pm 40.57$ | $116.30 \pm 39.23$ | 25.0% | 8.7% |
+
+> [!NOTE]
+> **Clinical Fast-Track Priority Regime:**
+> - **Critical Cohort (`ESI 1–2`):** Mean Door-to-Doctor time is **$15.7$ minutes** ($14.12$ min for ESI 1, $16.01$ min for ESI 2). Triage is completed in under $4.2$ minutes as life-saving protocols bypass waiting queues.
+> - **Standard Cohort (`ESI 3–5`):** Door-to-Doctor time jumps to an average of **$49.0$ minutes** ($+212\%$ wait increase). This separation reflects acute clinical protocol: stable patients wait in the general queue, whereas unstable patients are immediately roomed.
+
+---
+
+### Diagnostic Turnaround Latency Decomposition (X-Ray vs. Laboratory)
+
+Diagnostic service completion constitutes the primary operational delay for non-fast-track cases ($N=733$ requiring diagnostics):
+
+| Diagnostic Service | Receiving Cases ($N$) | Diagnostic Share | Mean Turnaround ($\pm$ Std) | Median Wait | Interquartile Range [IQR] | Absolute Range [Min–Max] | Operational Bottleneck Rating |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **`X-Ray`** | 584 | 58.4% | $22.42 \pm 7.52$ min | 22.0 min | 16.0 – 28.0 min | 10.0 – 35.0 min | Moderate (Rapid point-of-care digital radiology) |
+| **`Laboratory`** | 371 | 37.1% | $32.56 \pm 10.44$ min | 32.0 min | 25.0 – 40.0 min | 15.0 – 50.0 min | **High Bottleneck** ($+45.2\%$ longer than X-Ray) |
+| **`Clinical Reassessment`** | 235 | 23.5% | $35.11 \pm 9.06$ min | 35.0 min | 29.0 – 41.0 min | 16.0 – 57.0 min | **Severe Delay Penalty** (Secondary physician loopback) |
+
+- **Laboratory Latency Discrepancy:** Blood work and specimen analysis (`Lab Result`) requires an average of **$32.56$ minutes**, compared to **$22.42$ minutes** for `Radiology Result`. Laboratory turnaround is the dominant driver of extended stay in variants $V3$, $V5$, and $V6$.
+- **Rework Wait Burden:** For the 235 patients requiring repeat triage and doctor consultation, the loopback delay adds a median of **$35.0$ minutes** of idle waiting in the ED bay before secondary physician contact.
+
+---
+
+### Activity Queue Transition Matrix (`careflow_events_scaled.csv`)
+
+Across the **6,964 standardized clinical events**, step-to-step duration analysis reveals the exact distribution of queue waits across the 10 activity stages:
+
+| Activity Domain | Clinical Activity | Total Events ($N$) | Mean Predecessor Wait ($\pm$ Std) | Median | Min – Max | Clinical Stage Description |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| **Administrative** | `Registration` | 1,000 | $0.00 \pm 0.00$ min | 0.0 min | 0 – 0 min | Intake timestamp origin ($t_0$) |
+| **Administrative** | `Triage` | 1,235 | $11.87 \pm 6.54$ min | 11.0 min | 1 – 25 min | Initial nurse acuity assessment (1,000) + Rework re-triage (235) |
+| **Clinical** | `Doctor Assessment` | 1,000 | $30.74 \pm 16.27$ min | 29.0 min | 3 – 60 min | Primary physician clinical encounter |
+| **Diagnostic** | `X-Ray` | 584 | $15.09 \pm 5.98$ min | 15.0 min | 5 – 25 min | Transfer to radiography suite |
+| **Diagnostic** | `Radiology Result` | 584 | $22.42 \pm 7.52$ min | 22.0 min | 10 – 35 min | Radiologist read and electronic report sign-off |
+| **Administrative** | `Documentation Review` | 584 | $9.88 \pm 6.00$ min | 8.0 min | 2 – 25 min | Chart review and reconciliation following imaging |
+| **Clinical** | `Doctor Reassessment` | 235 | $11.64 \pm 4.92$ min | 12.0 min | 4 – 20 min | Secondary doctor evaluation post-rework triage |
+| **Diagnostic** | `Lab Collection` | 371 | $12.26 \pm 4.58$ min | 12.0 min | 5 – 20 min | Phlebotomy and blood sample drawing |
+| **Diagnostic** | `Lab Result` | 371 | $32.56 \pm 10.44$ min | 32.0 min | 15 – 50 min | Biochemical / hematological panel analyzer run |
+| **Administrative** | `Discharge` | 1,000 | $15.06 \pm 6.11$ min | 15.0 min | 5 – 25 min | Discharge counseling, medication instructions & departure |
+
+---
+
+### Target Correlation & Feature Sensitivity
+
+Evaluating Pearson and Spearman correlation coefficients across the **41 model-ready features** (`careflow_model_ready_scaled.csv`) validates the design of the feature store:
+
+| Predictive Target | Top Positive Predictors | Top Negative Predictors | Clinical & Statistical Rationale |
+| :--- | :--- | :--- | :--- |
+| **`target_total_duration_min`** | `target_loopback` ($r = 0.524$)<br/>`acuity` ($r = 0.232$)<br/>`target_ends_next_day` ($r = 0.123$)<br/>`resource_DR12` ($r = 0.063$) | `resource_DR01` ($r = -0.050$)<br/>`age` ($r = -0.042$)<br/>`shift_Evening` ($r = -0.041$) | Strongest driver of prolonged duration is clinical rework loopback ($r=0.524$), followed by non-critical triage delay ($r=0.232$). |
+| **`target_loopback`** | `total_duration_min` ($r = 0.524$)<br/>`resource_DR12` ($r = 0.076$)<br/>`resource_DR06` ($r = 0.057$)<br/>`age_group_18-39` ($r = 0.047$) | `resource_DR11` ($r = -0.059$)<br/>`resource_DR05` ($r = -0.055$) | Loopback shows clinician-specific variation (`DR12` at 34.1% vs `DR11` at 12.3%), validating doctor assignment as a critical fixed-effect feature. |
+| **`target_ends_next_day`** | `start_hour_cos` ($r = 0.387$)<br/>`shift_Night` ($r = 0.142$)<br/>`total_duration_min` ($r = 0.123$)<br/>`start_weekday_Friday` ($r = 0.057$) | `start_hour_sin` ($r = -0.328$)<br/>`shift_Day` ($r = -0.198$) | Strongest predictor of crossing midnight is arrival time harmonics ($\cos\theta$ peak at midnight) and night shift admissions. |
 
 ---
 
