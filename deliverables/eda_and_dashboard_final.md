@@ -32,7 +32,8 @@ Infotect Month 1 Project/
 │
 ├── deliveries/
 │   ├── CareFlow_Final_Analytics.pbix       <-- Master Power BI Analytics Report
-│   └── eda_and_dashboard_final.md           <--Sign-off & Execution Summary
+│   └── eda_and_dashboard_final.md          <--Sign-off & Execution Summary
+|   └── CareFlow_Master_EDA_Mining.ipynb    <-- Master EDA & Process Mining Notebook
 │
 ├── dashboard/                              <-- Technical notes & page drafts
 ├── data/
