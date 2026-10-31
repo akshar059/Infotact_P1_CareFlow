@@ -28,7 +28,7 @@ The master Power BI report (`deliveries/CareFlow_Final_Analytics.pbix`) consolid
 
 ## 3. Project Directory & Deliverables Layout
 ```text
-Infotect Month 1 Project/
+Infotact Month 1 Project/
 │
 ├── deliveries/
 │   ├── CareFlow_Final_Analytics.pbix       <-- Master Power BI Analytics Report
