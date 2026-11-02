@@ -44,6 +44,10 @@
   - [Empirical Machine Learning Baseline Benchmark (Test Cohort)](#empirical-machine-learning-baseline-benchmark-test-cohort)
   - [Dynamic Risk Stratification & Feature Horizon Limits](#dynamic-risk-stratification--feature-horizon-limits)
   - [Operational Bottleneck Mitigation & Hospital Action Plan](#operational-bottleneck-mitigation--hospital-action-plan)
+- [End-to-End Pipeline Walkthrough & Capacity Simulation](#-end-to-end-pipeline-walkthrough--capacity-simulation)
+  - [Worked Example: Case CF00278 Pipeline Transformation Lifecycle](#worked-example-case-cf00278-pipeline-transformation-lifecycle)
+  - [Quantitative What-If Capacity & Queue Reduction Simulation](#quantitative-what-if-capacity--queue-reduction-simulation)
+  - [Phased Hospital Implementation Roadmap & KPI Governance](#phased-hospital-implementation-roadmap--kpi-governance)
 - [Branch File Directory](#-branch-file-directory)
 - [How to Reproduce the Pipeline](#-how-to-reproduce-the-pipeline)
 - [Team & Contact](#-team--contact)
@@ -614,6 +618,101 @@ flowchart TD
 4. **Clinician Workload & Peer Protocol Alignment:**
    - Clinicians exhibit significant variation in disposition style (`DR11` at 12.3% rework vs. `DR12` at 34.1% rework).
    - Pairing peer reviews between high-throughput clinicians (`DR01`, `DR11`) and comprehensive evaluation clinicians (`DR06`, `DR12`) promotes standardized discharge protocols across emergency shifts.
+
+---
+
+## 🔍 End-to-End Pipeline Walkthrough & Capacity Simulation
+
+To connect the theoretical formulations with production hospital operations, this section presents a concrete case walkthrough through the preprocessing lifecycle, quantitative what-if queue reduction simulations, and an actionable implementation governance framework:
+
+### Worked Example: Case `CF00278` Pipeline Transformation Lifecycle
+
+To demonstrate how raw clinical intake is processed without data snooping, consider patient admission **`CF00278`** (a 22-year-old patient presenting at 09:13 on Thursday 1 January 2026, triaged at ESI Level 4, and assigned to attending physician `DR09`):
+
+```mermaid
+flowchart LR
+    subgraph Raw["1. Raw Intake"]
+        R1["age: 22<br/>acuity: 4<br/>start: 09:13 Thu<br/>doctor: DR09"]
+    end
+    subgraph Impute["2. Structural Imputation"]
+        I1["has_xray: 1<br/>has_lab: 0 (fill 0.0 min)<br/>has_reassessment: 1"]
+    end
+    subgraph Scale["3. Dual-Scaling (Train Fit)"]
+        S1["age_z: -1.527 | age_mm: 0.056<br/>acuity_z: +0.768 | acuity_mm: 0.750"]
+    end
+    subgraph ModelReady["4. Model-Ready Feature Store"]
+        M1["sin/cos 24h: (+0.707, -0.707)<br/>shift_Day: 1 | DR09: 1<br/>target_duration: 135.0 min"]
+    end
+    Raw --> Impute --> Scale --> ModelReady
+```
+
+| Pipeline Attribute | Raw Recorded Value | Standardized ($z$-score) | Normalized (Min-Max) | Model-Ready Encoding | Transformation Rule / Parameter Source |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **`age`** | 22 years | **$-1.527$** | **$0.056$** | `age_group_18-39 = 1` | $\mu=54.729, \sigma=21.428, \min=18, \max=90$ from `scaler_parameters.json` |
+| **`acuity`** | 4 (Less Urgent) | **$+0.768$** | **$0.750$** | Ordinal numeric ($4$) | Standard ESI ordinal scale $[1, 5]$; transformed via training $\mu=3.298, \sigma=0.915$ |
+| **`case_start`** | `2026-01-01 09:13` | N/A | N/A | `start_hour = 9` | Extracted integer hour for trigonometric coordinates |
+| **`start_hour_sin`** | 9 AM ($0.375 	imes 2\pi$) | N/A | N/A | **$+0.7071$** | Continuous harmonic coordinate $\sin(2\pi \cdot 9 / 24)$ |
+| **`start_hour_cos`** | 9 AM ($0.375 	imes 2\pi$) | N/A | N/A | **$-0.7071$** | Continuous harmonic coordinate $\cos(2\pi \cdot 9 / 24)$ |
+| **`start_weekday`** | Thursday | N/A | N/A | `start_weekday_Thursday = 1` | One-hot binary dummy representation |
+| **`shift`** | Day (07:00–15:00) | N/A | N/A | `shift_Day = 1` | Operational shift block dummy indicator |
+| **`resource`** | `DR09` | N/A | N/A | `resource_DR09 = 1` | Physician-specific fixed effect one-hot dummy |
+| **`lab_turnaround_min`** | Unordered (Structural NaN) | N/A | N/A | Filled with **$0.0$ min** | Structural non-event: preserved by `has_lab = 0` indicator |
+| **`xray_to_result_min`** | 29.0 min | $+1.295$ | $0.829$ | Kept in full case record | Ordered radiography test; scaled using training radiology distribution |
+| **Target: Duration** | 135.0 min | **$+0.636$** | N/A | Continuous regression target | Realized total LOS ($V4$ Pathway: Radiology + Loopback Rework) |
+| **Target: Loopback** | $1$ (Rework observed) | N/A | N/A | `target_loopback = 1` | Binary rework label (Re-triage triggered by missing intake paperwork) |
+| **Target: Boarding** | $0$ (Same-day exit) | N/A | N/A | `target_ends_next_day = 0` | Binary midnight threshold label (Discharged at 11:28 AM) |
+
+---
+
+### Quantitative What-If Capacity & Queue Reduction Simulation
+
+To evaluate the operational returns of targeted interventions across the hospital emergency department, a queueing sensitivity simulation was performed across all **1,000 patient traces**:
+
+$$\Delta T_{	ext{cohort}} = N_{	ext{visits}} 	imes \overline{\Delta t} 	imes lpha_{	ext{reduction}}$$
+
+| Clinical Transition Interval | Impacted Cohort ($N$) | Baseline Mean ($\pm$ Std) | 10% Queue Reduction | 20% Queue Reduction | 30% Queue Reduction | Operational Bottleneck Mechanism |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **`Triage` $	o$ `Doctor Assessment`** | 1,000 cases | $30.74 \pm 16.27$ min | **51.2 hours** | **102.5 hours** | **153.7 hours** | Primary physician waiting queue bottleneck |
+| **`X-Ray` $	o$ `Radiology Result`** | 584 cases | $22.42 \pm 7.52$ min | **21.8 hours** | **43.6 hours** | **65.5 hours** | Digital radiography acquisition and reading queue |
+| **`Lab Collection` $	o$ `Lab Result`** | 371 cases | $32.56 \pm 10.44$ min | **20.1 hours** | **40.3 hours** | **60.4 hours** | Specimen transport and analyzer processing latency |
+| **Complete Elimination of Loopback Rework** | 235 cases | $35.11 \pm 9.06$ min | — | — | **~116.0 hours** | Re-triage and secondary doctor evaluation loop |
+
+> [!TIP]
+> **Key Capacity Insight:**
+> - Completely eliminating administrative loopback rework releases **116.0 patient-hours** of ED bay occupancy over 2 months.
+> - A **20% operational efficiency improvement** in the front-end `Triage -> Doctor Assessment` transition achieves a comparable capacity recovery (**102.5 patient-hours**), but benefits **100% of all 1,000 patients** rather than only the 235 rework cases.
+> - Consequently, hospital administration should pursue a dual-track strategy: deploy electronic intake checklists for fast administrative loopback elimination while redesigning doctor triage staffing.
+
+---
+
+### Phased Hospital Implementation Roadmap & KPI Governance
+
+Translating these empirical findings into clinical practice requires a phased deployment structure paired with rigorous KPI monitoring:
+
+```mermaid
+gantt
+    title CareFlow Hospital Operations Implementation Roadmap
+    dateFormat  YYYY-MM-DD
+    section Phase 1: Quick Wins
+    Electronic Intake Checklist (Paperwork Fix) :2026-11-01, 30d
+    19:00 Midnight Bed Pre-Allocation ML Alert  :2026-11-15, 30d
+    section Phase 2: Workflow
+    Parallel Diagnostic Order Bundling (V5/V6)   :2026-12-01, 45d
+    Nurse Practitioner Fast-Track Bay for ESI 4-5:2026-12-15, 45d
+    section Phase 3: Analytics
+    Real-Time Two-Stage Dynamic LOS Predictor   :2027-01-15, 60d
+    Executive Process Mining Dashboard (PM4Py)  :2027-02-01, 45d
+```
+
+#### Ongoing Operational KPI Governance Matrix:
+
+| Operational Metric | Baseline Cohort Value | 3-Month Target | 6-Month Target | Measurement Source | Clinical Governance Objective |
+| :--- | :---: | :---: | :---: | :--- | :--- |
+| **Door-to-Doctor Time (ESI 3–5)** | 48.9 min | $\le 35.0$ min | $\le 25.0$ min | `careflow_cases_imputed.csv` | Prevent clinical deterioration in waiting room |
+| **Emergency Loopback Rate** | 23.5% (235 cases) | $\le 12.0\%$ | $\le 5.0\%$ | `careflow_model_ready_scaled.csv` | Eliminate re-triage caused by incomplete intake paperwork |
+| **Laboratory Turnaround Time** | 32.56 min | $\le 25.0$ min | $\le 20.0$ min | `careflow_events_scaled.csv` | Point-of-care rapid analyzers to expedite disposition |
+| **Midnight Boarding Fraction** | 8.1% (81 cases) | $\le 4.0\%$ | $\le 2.0\%$ | `target_ends_next_day` | Early evening transfer to inpatient beds |
+| **Overall Emergency Department LOS** | 107.5 min | $\le 90.0$ min | $\le 75.0$ min | `target_total_duration_min` | Maximize throughput and emergency bay turnover |
 
 ---
 
