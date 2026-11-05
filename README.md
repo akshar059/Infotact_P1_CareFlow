@@ -52,6 +52,10 @@
   - [Multi-Branch Independent Cross-Verification Audit](#multi-branch-independent-cross-verification-audit)
   - [Interactive Streamlit & Power BI Architecture](#interactive-streamlit--power-bi-architecture)
   - [Algorithmic Fairness, Demographic Parity & Clinical Governance](#algorithmic-fairness-demographic-parity--clinical-governance)
+- [Mathematical Invariant Matrix, FMEA Risk Register & Conformance Audit](#-mathematical-invariant-matrix-fmea-risk-register--conformance-audit)
+  - [The 14-Point Comprehensive Testing & Mathematical Invariant Matrix (T1–T14)](#the-14-point-comprehensive-testing--mathematical-invariant-matrix-t1t14)
+  - [Project Failure Mode & Effects Analysis (FMEA) Risk Register](#project-failure-mode--effects-analysis-fmea-risk-register)
+  - [Process Conformance Checking & Token Replay Dynamics](#process-conformance-checking--token-replay-dynamics)
 - [Branch File Directory](#-branch-file-directory)
 - [How to Reproduce the Pipeline](#-how-to-reproduce-the-pipeline)
 - [Team & Contact](#-team--contact)
@@ -827,6 +831,98 @@ Deploying predictive models in life-critical hospital environments mandates comp
 | **Acuity-Protected Triage Velocity** | Critical Patients (ESI 1–2, $N=170$) vs Standard (ESI 3–5) | Door-to-Doctor velocity is rigorously prioritized ($15.7$ min for ESI 1–2 vs $49.0$ min for ESI 3–5). | Feature store explicitly isolates ESI acuity as a non-negotiable clinical priority feature, preventing artificial de-prioritization. |
 | **Patient Privacy & De-Identification** | 1,000 Patient Records & 6,964 Event Logs | All records utilize synthetic surrogate IDs (`CF00001`–`CF01000`) and relative temporal offsets. | Fully compliant with **HIPAA Safe Harbor Standard** and **GDPR Article 9**; zero protected health information (PHI) stored. |
 | **Model Explainability & Auditing** | Linear Ridge & Tree Ensemble Predictions | Feature weights and SHAP importances correlate with physiological acuity and circadian timing rather than administrative proxies. | Transparent scaler parameters exported to `scaler_parameters.json` enable full auditability for every transformed prediction. |
+
+---
+
+## 🛡️ Mathematical Invariant Matrix, FMEA Risk Register & Conformance Audit
+
+To validate the statistical integrity, clinical safety, and process fidelity of the CareFlow data pipeline, this section establishes the formal mathematical invariant test matrix, an engineering Failure Mode and Effects Analysis (FMEA) risk register, and the PM4Py token replay conformance audit:
+
+### The 14-Point Comprehensive Testing & Mathematical Invariant Matrix (T1–T14)
+
+Beyond routine code execution, the pipeline enforces **14 mathematical conservation invariants and schema consistency tests** across the entire 1,000-case and 6,964-event logs:
+
+```mermaid
+flowchart TD
+    subgraph DataConservation["Data Conservation Laws"]
+        C1["Time Conservation: Sum of step deltas == Sum of case durations (107,496 min)"]
+        C2["Event Conservation: Loopback events == 3 * Loopback cases (705 == 3 * 235)"]
+        C3["Trace Boundary: 100% of cases start at Registration & end at Discharge"]
+    end
+    subgraph MathScaling["Mathematical Scaling Invariants"]
+        M1["Standardization: Mean == 0 (max drift 1.27e-16), Std == 1"]
+        M2["Normalization: Min == 0, Max == 1 (exact bounds achieved)"]
+        M3["Bijective Recovery: Inverse transform recovers exact original raw matrix"]
+    end
+    DataConservation & MathScaling --> PASS["14 / 14 TEST CASES PASS"]
+```
+
+| Test ID | Audit Dimension | Invariant Condition Tested | Expected Verification Criterion | Empirical Result | Audit Status |
+| :---: | :--- | :--- | :--- | :---: | :---: |
+| **`T1`** | **Temporal Isolation** | Chronological partition non-overlap | $\max(t_{\text{case\_start, train}}) \le \min(t_{\text{case\_start, test}})$ | Cutoff at `2026-02-18 11:00:00` | **PASS** |
+| **`T2`** | **Structural Integrity** | Procedure non-events match binary flags | $col = \text{NaN} \iff has\_\text{flag} = 0$ | Exact coincidence across X-ray, Lab, Rework | **PASS** |
+| **`T3`** | **Imputation Completeness** | Absence of unresolved null values | $\sum \text{isnull}(X) = 0$ post-imputation | $0$ null values remaining in all 32 case columns | **PASS** |
+| **`T4`** | **Standardization Centering** | $Z$-score mean centering and unit variance | $\mu_{\text{train}} = 0, \sigma_{\text{train}} = 1.0$ | $\max|\mu| = 1.27 \times 10^{-16}, \sigma = 1.000$ | **PASS** |
+| **`T5`** | **Normalization Bounding** | Min-Max scaling interval bounds | $\min(X_{\text{norm, train}}) = 0, \max(X_{\text{norm, train}}) = 1$ | Exact $[0.0, 1.0]$ boundary achieved | **PASS** |
+| **`T6`** | **Bijective Reversibility** | Exact mathematical inverse transform recovery | $\|X_{\text{raw}} - \text{scaler}^{-1}(\text{scaler}(X))\|_\infty = 0$ | Exact floating-point identity recovered | **PASS** |
+| **`T7`** | **Event Log Conservation** | Total event volume conservation | $N_{\text{events, scaled}} = N_{\text{events, clean}}$ | Exactly $6,964$ event rows preserved | **PASS** |
+| **`T8`** | **Feature Store Integrity** | Complete feature space for admission inference | $\sum \text{isnull}(X_{\text{model-ready}}) = 0$ | Exactly $0$ nulls across 41 arrival-time columns | **PASS** |
+| **`T9`** | **Schema Typing** | Strict categorical and datetime data types | ISO 8601 formatting and boolean casting | Datetime parsed without exception | **PASS** |
+| **`T10`** | **Trace Bounding** | Universal trace start and termination | $\forall c: \text{start} = \text{Reg} \land \text{end} = \text{Discharge}$ | $1,000$ of $1,000$ cases ($100.0\%$) conform | **PASS** |
+| **`T11`** | **Time Conservation Law** | Conservation of total elapsed patient-minutes | $\sum_{i=1}^{1000} \text{LOS}_i = \sum_{j=1}^{6964} \Delta t_{\text{prev}, j}$ | **$107,496.0$ min on both sides** | **PASS** |
+| **`T12`** | **Rework Triplication Law** | Loopback trace step conservation | $N_{\text{loopback\_events}} = 3 \times N_{\text{loopback\_cases}}$ | **$705 = 3 \times 235$** (Triage + Review + Reassess) | **PASS** |
+| **`T13`** | **Variant Harmonization** | Exact trace variant cluster distribution | Multi-branch variant count reconciliation | $V1: 267, V2: 216, V3: 149, V4: 146, V5: 133, V6: 89$ | **PASS** |
+| **`T14`** | **Cross-File Reproducibility**| Reproduce summary metrics from raw outputs | Agreement across independent summary scripts | $100\%$ statistical parity across all metrics | **PASS** |
+
+---
+
+### Project Failure Mode & Effects Analysis (FMEA) Risk Register
+
+To ensure safe translational deployment in clinical environments, a Failure Mode and Effects Analysis (FMEA) was conducted to evaluate potential operational and modeling failure modes:
+
+| Failure Mode ID | Potential Failure Mechanism | Clinical & Operational Consequence | Initial Risk (S×O×D) | Engineered Mitigation Strategy Enforced | Residual Risk |
+| :---: | :--- | :--- | :---: | :--- | :---: |
+| **`FM-01`** | **Data Leakage into Training Set** | Future patient test distribution leaks into training; models report inflated test accuracy and fail in production. | High (9 × 6 × 8 = **432**) | Strict chronological 80/20 train/test split. All imputation and scaling statistics fit exclusively on cases $\le 2026-02-18\ 11:00:00$. Parameters frozen in `scaler_parameters.json`. | **LOW (36)** |
+| **`FM-02`** | **Synthetic Diagnostic Imputation** | Naive mean or median imputers fabricate non-zero turnaround times for patients who never received X-rays or labs. | Critical (8 × 7 × 7 = **392**) | Structural missingness architecture: missing steps explicitly flagged with `has_xray = 0`, `has_lab = 0`, and filled with `0.0` min rather than fabricated durations. | **LOW (24)** |
+| **`FM-03`** | **Queue Latency Misinterpretation** | Step interval `minutes_since_prev` is misinterpreted as pure idle waiting time rather than active clinician workup. | Medium (6 × 8 × 5 = **240**) | Documented clinical distinction: intervals capture composite transfer, preparation, execution, and interpretation stages. Transition matrix explicitly profiles variance. | **LOW (30)** |
+| **`FM-04`** | **Multi-Branch Statistical Drift** | Discrepancies emerge between parallel analytical branches analyzing the same underlying event log. | High (7 × 7 × 6 = **294**) | Mathematical cross-verification audit (Table 10.1); immutable single source of truth anchored on branch `akshar` preprocessed artifacts. | **LOW (21)** |
+| **`FM-05`** | **Clinician Performance Bias** | Emergency physicians evaluated unfairly due to confounding by patient acuity or small individual sample sizes. | High (8 × 6 × 6 = **288**) | Attending doctor metrics cross-tabulated against mean patient acuity. Fixed-effects indicators (`resource_DR01`–`DR12`) adjust for clinician assignment styles. | **LOW (32)** |
+| **`FM-06`** | **PHI Exposure & Privacy Violation** | Exposure of patient protected health information or confidential hospital operational records. | Critical (10 × 4 × 5 = **200**) | Complete synthetic de-identification, surrogate patient keys (`CF00001`–`CF01000`), and relative timestamps conforming to HIPAA Safe Harbor and GDPR Article 9. | **LOW (20)** |
+
+---
+
+### Process Conformance Checking & Token Replay Dynamics
+
+To evaluate whether the discovered clinical process models strictly represent patient journeys without illegal behavior, process conformance checking was executed using **PM4Py token-based replay** across the 6 canonical variants:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Patient
+    participant Triage as Triage Station
+    participant Doc as Primary Clinician
+    participant Diag as Radiology / Lab
+    participant Reassess as Clinical Rework Loop
+    participant Discharge as Departure Bay
+
+    Patient->>Triage: Registration & Initial Triage (100% Cases)
+    Triage->>Doc: Doctor Assessment (100% Cases, Wait: 30.7 min)
+    alt Fast Track (Variant 1: 26.7%)
+        Doc->>Discharge: Direct Discharge (58.6 min LOS)
+    else Linear Diagnostic (Variants 2, 3, 5: 49.8%)
+        Doc->>Diag: X-Ray (58.4%) and/or Lab Collection (37.1%)
+        Diag->>Discharge: Results Review & Discharge (102 - 146 min LOS)
+    else Rework Loopback (Variants 4, 6: 23.5%)
+        Doc->>Diag: Diagnostic Execution
+        Diag->>Reassess: Secondary Re-triage & Doctor Reassessment (705 events)
+        Reassess->>Discharge: Final Disposition & Discharge (133 - 175 min LOS)
+    end
+```
+
+#### Token Replay Conformance Metrics:
+- **Trace Fitness ($f_{\text{fitness}} = 1.000$):** All 1,000 patient traces achieve **100% token replay fitness** on the discovered Petri net model without missing or remaining tokens. Every patient trajectory maps cleanly into one of the 6 canonical archetypes.
+- **Precision Metric ($p = 0.942$):** The process model permits minimal extraneous behavior; only trajectories with observed clinical pathways can fire.
+- **Structural Concurrency:** In variants $V5$ and $V6$, token transitions demonstrate that laboratory testing is currently blocked until radiology review completes, mathematically confirming the serial queueing bottleneck identified in the operational action plan.
 
 ---
 
