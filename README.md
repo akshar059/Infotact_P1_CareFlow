@@ -56,6 +56,10 @@
   - [The 14-Point Comprehensive Testing & Mathematical Invariant Matrix (T1–T14)](#the-14-point-comprehensive-testing--mathematical-invariant-matrix-t1t14)
   - [Project Failure Mode & Effects Analysis (FMEA) Risk Register](#project-failure-mode--effects-analysis-fmea-risk-register)
   - [Process Conformance Checking & Token Replay Dynamics](#process-conformance-checking--token-replay-dynamics)
+- [Formal Project Deliverables & Submission Package](#-formal-project-deliverables--submission-package)
+  - [Technical Project Report (CareFlow_Project_Report.pdf)](#1-technical-project-report-careflow_project_reportpdf)
+  - [Engineering System Documentation (CareFlow_Project_Documentation.pdf)](#2-engineering-system-documentation-careflow_project_documentationpdf)
+  - [Executive Leadership Presentation (CareFlow_Presentation_v2.pdf)](#3-executive-leadership-presentation-careflow_presentation_v2pdf)
 - [Branch File Directory](#-branch-file-directory)
 - [How to Reproduce the Pipeline](#-how-to-reproduce-the-pipeline)
 - [Team & Contact](#-team--contact)
@@ -926,11 +930,67 @@ sequenceDiagram
 
 ---
 
+## 📦 Formal Project Deliverables & Submission Package
+
+In accordance with the **Infotact Solutions Internship Scope of Work** (Ref. No. `ITS/DA/1176`), this branch houses the complete suite of formal deliverables compiled for academic review, organizational sign-off, and clinical stakeholder presentation:
+
+```mermaid
+flowchart TD
+    subgraph CoreDeliverables["CareFlow Formal Deliverables Suite"]
+        D1["📄 CareFlow_Project_Report.pdf<br/>70-Page End-to-End Technical & Clinical Study"]
+        D2["📘 CareFlow_Project_Documentation.pdf<br/>Exhaustive Architecture, Schemas & Validation Proofs"]
+        D3["📊 CareFlow_Presentation_v2.pdf<br/>Executive Slide Deck for Hospital Operations & C-Suite"]
+    end
+    subgraph Audience["Target Stakeholders"]
+        A1["Academic Mentors & Assessment Committee"]
+        A2["Data Engineering & ML Infrastructure Teams"]
+        A3["Hospital Leadership & ED Medical Directors"]
+    end
+    D1 --> A1
+    D2 --> A2
+    D3 --> A3
+```
+
+### 1. Technical Project Report (`CareFlow_Project_Report.pdf`)
+*Comprehensive 70-page formal investigation report documenting the process mining study, statistical profiles, and operational interventions:*
+- **Document Title:** *CareFlow: Clinical Pathway Process Mining — Process-Mining and Predictive-Analytics Study of Emergency Department Patient Journeys*
+- **Author:** Akshar Patel (Data Associate L1 Intern, Data Analytics) | Project Team: Akshar Patel, Sagar Janathe, Prachi Bhilare, Prashanth
+- **Key Chapters & Coverage:**
+  1. *Introduction & Background:* Emergency department overcrowding, clinical pathway objectives, and data governance.
+  2. *Methodology & Tech Stack:* PM4Py process mining, chronological train/test partitioning, Bayesian imputation, and dual-scaling frameworks.
+  3. *Dataset & Activity Catalogue:* Full statistical and temporal profile across 1,000 cases and 6,964 timestamped events.
+  4. *Exploratory Insights & Queue Breakdown:* Door-to-doctor bifurcation, ESI acuity stratification, circadian waves, and physician workload profiles (`DR01`–`DR12`).
+  5. *Process Mining & Petri Net Discovery:* 6 canonical pathway variants, rework delay penalties, and token replay fitness ($1.000$).
+  6. *Results & Actionable Recommendations:* Parallel diagnostic ordering protocols, electronic intake checklist implementation, proactive 19:00 bed pre-allocation, and what-if capacity recovery simulations.
+  7. *Testing, Validation & Inter-Branch Reconciliation:* 14-point mathematical invariant test matrix and multi-branch data audit.
+
+---
+
+### 2. Engineering System Documentation (`CareFlow_Project_Documentation.pdf`)
+*Complete technical systems manual and data engineering handbook:*
+- **Pipeline Architecture:** Step-by-step documentation of `careflow_impute_scale.py` covering chronological splitting, structural imputation rules, and scaler parameter serialization.
+- **Output Feature Catalog:** Full data dictionary detailing all 41 columns of `careflow_model_ready_scaled.csv`, 27 columns of `careflow_events_scaled.csv`, and 32 columns of `careflow_cases_imputed.csv`.
+- **Validation Run Proofs:** Complete test-case execution matrix confirming 16/16 automated pipeline passes and zero data leakage.
+
+---
+
+### 3. Executive Leadership Presentation (`CareFlow_Presentation_v2.pdf`)
+*Executive presentation slide deck tailored for hospital chief operating officers, ED nurse managers, and medical directors:*
+- **The Core Clinical Problem:** Quantifying the patient waiting bottleneck (48.9 min door-to-doctor wait for standard patients).
+- **Process Bottlenecks Visualized:** Identifying the $+45.2\%$ laboratory turnaround latency and $+30.5$ minute loopback rework penalty.
+- **Actionable Interventions:** The 4-pillar hospital optimization strategy (parallel diagnostics, paperwork validation, proactive bed reservation, clinician peer alignment).
+- **Capacity Recovery:** Realizing **~116 patient-hours** from loopback elimination and **102.5 patient-hours** from triage-to-doctor queue reduction.
+
+---
+
 ## 📁 Branch File Directory
 
 ```text
 . (branch: akshar)
 ├── README.md                          # Branch-specific technical documentation
+├── CareFlow_Project_Report.pdf        # Comprehensive 70-page technical project report
+├── CareFlow_Project_Documentation.pdf # Technical system architecture & schema documentation
+├── CareFlow_Presentation_v2.pdf       # Executive presentation slide deck for hospital leadership
 ├── careflow_impute_scale.py           # Core Python preprocessing, imputation & scaling pipeline
 ├── careflow_cases_imputed.csv         # Complete case records with structural imputation (1,000 x 32)
 ├── careflow_cases_standardized.csv    # Z-score standardized case metrics (1,000 x 33)
