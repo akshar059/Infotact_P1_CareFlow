@@ -10,7 +10,7 @@ CareFlow is an end-to-end clinical process mining and analytics framework design
 
 ## 👥 Project Team & Role Attribution
 
-- **Member (Sagar Janathe):** Core Data Pipeline, Feature Engineering, Outlier & Anomaly Detection, Notebook Modules (Days 1–16), and Final Consolidated Analytics Deliverables[cite: 2, 6, 7].
+- **Sagar Janathe:** Core Data Pipeline, Feature Engineering, Outlier & Anomaly Detection, Notebook Modules (Days 1–16), and Final Consolidated Analytics Deliverables[cite: 2, 6, 7].
 - **Collaborating Team Members:** Process Mining Visualizations, Emergency Flow Overview, and Workload Analytics[cite: 2, 5].
 
 ---
@@ -19,6 +19,9 @@ CareFlow is an end-to-end clinical process mining and analytics framework design
 
 | Asset Category | File / Path | Description |
 | :--- | :--- | :--- |
+| **Project Report** | [`CareFlow_Project_Report.pdf`](./CareFlow_Project_Report.pdf)[cite: 8] | Comprehensive final technical and analytical report |
+| **Project Documentation** | [`CareFlow_Project_Documentation.pdf`](./CareFlow_Project_Documentation.pdf)[cite: 8] | Complete system architecture, workflow, and technical documentation |
+| **Executive Presentation** | [`CareFlow_Presentation.pdf`](./CareFlow_Presentation.pdf)[cite: 8] | Stakeholder pitch deck and high-level findings slide deck |
 | **Master Dashboard** | [`deliverables/CareFlow_Final_Analytics.pbix`](./deliverables/CareFlow_Final_Analytics.pbix)[cite: 6] | Consolidated multi-page Power BI report integrating all process mining modules |
 | **Master Notebook** | [`deliverables/CareFlow_Master_EDA_Mining.ipynb`](./deliverables/CareFlow_Master_EDA_Mining.ipynb)[cite: 6] | Cleaned, leakage-free end-to-end data processing and clinical event log pipeline |
 | **Executive Summary** | [`STAKEHOLDER_SUMMARY.md`](./STAKEHOLDER_SUMMARY.md)[cite: 2] | Strategic recommendations and high-level management findings |
@@ -56,5 +59,8 @@ Infotact_P1_CareFlow/
 │   ├── day3_eda_baseline.ipynb
 │   ├── day11_outlier_and_anomaly_detection.ipynb
 │   └── day16_final_metrics_summary.ipynb[cite: 7]
+├── CareFlow_Presentation.pdf               # Presentation slides[cite: 8]
+├── CareFlow_Project_Documentation.pdf      # Detailed technical documentation[cite: 8]
+├── CareFlow_Project_Report.pdf             # Main final project report[cite: 8]
 ├── README.md                               # Main project documentation[cite: 2]
 └── STAKEHOLDER_SUMMARY.md                  # Executive insights & strategy[cite: 2]
